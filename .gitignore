@@ -1,6 +1,11 @@
 # Ignore all node modules (for JavaScript/Node.js projects)
 node_modules/
 
+**dist
+**node_modules
+**build
+**/.git/
+
 # Logs and temporary files
 logs/
 *.log
@@ -64,3 +69,4 @@ build/
 # Ignore public files (optional, modify as needed)
 public/*.js
 public/*.map
+.idea
