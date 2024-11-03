@@ -12,7 +12,7 @@ export class AppController {
     await this.appService.checkStock('jaffa-cake', 1);
   }
 
-  @Get('create-stock')
+  @Post('create-stock')
   async createStock(@Body() body: any) {
     const { stockId, quantity, name } = body; // Destructure body data
     // console.log(stockId, quantity, name)
