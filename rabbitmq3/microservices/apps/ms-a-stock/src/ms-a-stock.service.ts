@@ -28,28 +28,26 @@ export class MsAStockService {
       throw error;
     }
   }
+  public async checkQuentity(data) {
+    try {
+      const { stockId, quantity } = data;
+      if (typeof quantity !== 'number' || quantity <= 0) {
+        throw new Error(`Invalid quantity: ${quantity}. Must be a positive number.`);
+      }
+      const stock = await this.stockRepository
+          .createQueryBuilder()
+          .update(Stock)
+          .set({ quantity: () => `quantity - ${quantity}` })
+          .where("stockId = :stockId AND quantity >= :quantity", { stockId, quantity })
+          .returning("*")
+          .execute();
+      if (!stock) {
+        throw new Error('stock error');
+      }
+      return stock;
 
-  // @RabbitSubscribe({
-  //   exchange: 'stock',
-  //   routingKey: 'stock-route',
-  //   queue: 'stock-queue',
-  // })
-
-  // public async pubSubHandler(data: any) {
-  //   try {
-  //     await this.createStock(data.data)
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // }
-  // public async createStock(data) {
-  //   try {
-  //     const newStock = this.stockRepository.create(data);
-  //     console.log(newStock);
-  //     return await this.stockRepository.save(newStock);
-  //   } catch (error) {
-  //     console.error(error);
-  //     throw error;
-  //   }
-  // }
+    } catch (e) {
+      console.error(e);
+    }
+  }
 }

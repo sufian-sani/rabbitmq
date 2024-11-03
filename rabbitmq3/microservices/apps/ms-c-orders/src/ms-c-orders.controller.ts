@@ -10,9 +10,8 @@ export class MsCOrdersController {
 
   @MessagePattern({ cmd: 'order_create' })
   async handleCreateStock(@Payload() data: any) {
-    const ceateStock = await this.msCOrdersService.createStock(data)
-    console.log(ceateStock);
-    return 'got ceateOrder';
+    const ceateOrder = await this.msCOrdersService.createOrder(data)
+    return ceateOrder;
   }
 
 }

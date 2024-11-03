@@ -3,9 +3,23 @@ import { MsCOrdersController } from './ms-c-orders.controller';
 import { MsCOrdersService } from './ms-c-orders.service';
 import {RabbitMQModule} from "@golevelup/nestjs-rabbitmq";
 import {MsCOrdersDatabaseModule} from "./ms-c-orders.database.module";
+import {ClientsModule, Transport} from "@nestjs/microservices";
 
 @Module({
   imports: [
+      ClientsModule.register([
+          {
+              name: 'ORDER_SERVICE_CHECK',
+              transport: Transport.RMQ,
+              options: {
+                  urls: ['amqp://localhost:5672'],
+                  queue: 'my_order_stock_check_queue', // The queue to both send to and listen from
+                  queueOptions: {
+                      durable: false,
+                  },
+              },
+          },
+      ]),
       MsCOrdersDatabaseModule,
   ],
   controllers: [MsCOrdersController],

@@ -19,4 +19,10 @@ export class MsAStockController {
     const ceateStock = await this.msAStockService.createStock(data)
     return ceateStock;
   }
+
+  @MessagePattern({ cmd: 'check_quentity' })
+  async handleCheckQuentity(@Payload() data: any) {
+    const quentityAvailable = await this.msAStockService.checkQuentity(data)
+    return quentityAvailable;
+  }
 }
