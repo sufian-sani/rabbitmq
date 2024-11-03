@@ -3,7 +3,7 @@ import { MsAStockController } from './ms-a-stock.controller';
 import { MsAStockService } from './ms-a-stock.service';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import {databaseProviders} from "./ms-a-stock.database.provider";
-import {modelProviders} from "./ms-a-stock.model.providers";
+import { MsAStockDatabaseModule } from './ms-a-stock.database.module';
 
 @Module({
   imports: [
@@ -16,13 +16,12 @@ import {modelProviders} from "./ms-a-stock.model.providers";
       ],
       uri: 'amqp://localhost:5672',
     }),
-    MsAStockModule
+    // MsAStockModule,
+    MsAStockDatabaseModule,
   ],
   controllers: [MsAStockController],
   providers: [
       MsAStockService,
-      ...databaseProviders,
-      ...modelProviders
   ],
 })
 export class MsAStockModule {}

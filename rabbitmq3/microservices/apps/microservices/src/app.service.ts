@@ -8,9 +8,15 @@ export class AppService {
       private readonly amqpConnection: AmqpConnection,
   ) {}
 
+  // stock
   async checkStock(itemName, quantity) {
     await this.amqpConnection.publish('stock', 'stock-route', { data: { itemName, quantity } });
     console.log('msg published', 'stock', 'stock-route', { data: { itemName, quantity } });
+  }
+
+  async createStock(stockId:string, quantity:number, name:string) {
+    await this.amqpConnection.publish('stock', 'stock-route', { type: 'create_stock', data: {stockId, quantity, name} })
+    console.log('msg published', 'stock', 'stock-route', { type: 'create_stock', data: { stockId, quantity, name } });
   }
 
   async createOrder(customerName, itemName, quantity) {
@@ -21,9 +27,5 @@ export class AppService {
   async checkDelivery(customerName) {
     await this.amqpConnection.publish('delivery', 'delivery-route', { data: { customerName } });
     console.log('msg published', 'delivery', 'delivery-route', { data: { customerName } });
-  }
-  async createStock(uuid, quantity, itemName) {
-    await this.amqpConnection.publish('stock', 'stock-route', { type: 'create_stock', data: {uuid, quantity, itemName} })
-    console.log('msg published', 'stock', 'stock-route', { type: 'create_stock', data: { uuid, quantity } });
   }
 }

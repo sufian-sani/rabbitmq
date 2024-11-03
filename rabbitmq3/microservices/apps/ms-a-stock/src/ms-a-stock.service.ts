@@ -1,13 +1,17 @@
 import {Inject, Injectable} from '@nestjs/common';
 import {RabbitSubscribe} from "@golevelup/nestjs-rabbitmq";
-import {Stock} from "./interface/stock.interface";
-import {Model} from "mongoose";
+import { Stock } from './schemas/stock.entity';
+import { Repository, DataSource } from 'typeorm';
+import {InjectRepository} from "@nestjs/typeorm";
 
 @Injectable()
 export class MsAStockService {
+  private stockRepository: Repository<Stock>;
   constructor(
-      @Inject('STOCK_MODEL') private stockModel: Model<Stock>,
-  ) {}
+      @Inject('DATA_SOURCE') private dataSource: DataSource,
+  ) {
+    this.stockRepository = this.dataSource.getRepository(Stock);
+  }
 
   @RabbitSubscribe({
     exchange: 'stock',
@@ -15,17 +19,21 @@ export class MsAStockService {
     queue: 'stock-queue',
   })
 
-  public async pubSubHandler(msg: any) {
-    switch (msg.type){
-      case 'create_stock':
-        this.createStock(msg.data)
-            break;
-        default:
-          // none for now
+  public async pubSubHandler(data: any) {
+    try {
+      await this.createStock(data.data)
+    } catch (error) {
+      console.error(error);
     }
-    console.log(`Received message: ${JSON.stringify(msg)}`);
   }
   public async createStock(data) {
-    return await new this.stockModel(data).save()
+    try {
+      const newStock = this.stockRepository.create(data);
+      console.log(newStock);
+      return await this.stockRepository.save(newStock);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }
