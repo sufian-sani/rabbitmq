@@ -4,16 +4,23 @@ import {MsAStockModule} from "./ms-a-stock.module";
 
 
 async function bootstrap() {
-  const app = await NestFactory.create(MsAStockModule, {
-    // transport: Transport.RMQ,
-    // options: {
-    //   urls: ['amqp://localhost:5672'],
-    //   queue: 'mailbox',
-    //   queueOptions: {
-    //     durable: false
-    //   },
-    // },
+  const app = await NestFactory.create(MsAStockModule);
+
+  // Connect the RabbitMQ microservice
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: ['amqp://localhost:5672'], // RabbitMQ server URL
+      queue: 'my_queue_main',               // Queue to listen to
+      queueOptions: {
+        durable: false,
+      },
+    },
   });
+
+  // Start the microservice
+  await app.startAllMicroservices();
+
   await app.listen((3001));
 }
 

@@ -1,7 +1,22 @@
-import { Controller, Get } from '@nestjs/common';
+import {Controller, Get, Inject} from '@nestjs/common';
 import { MsAStockService } from './ms-a-stock.service';
+import {ClientProxy, MessagePattern, Payload} from '@nestjs/microservices';
 
 @Controller()
 export class MsAStockController {
-  constructor(private readonly microserviceAService: MsAStockService) {}
+  constructor(
+      private readonly msAStockService: MsAStockService
+  ) {}
+
+  @MessagePattern({ cmd: 'stock_check' })
+  async handleCheckStock(@Payload() data: any) {
+    const stockData = await this.msAStockService.checkStock()
+    return stockData;
+  }
+
+  @MessagePattern({ cmd: 'stock_create' })
+  async handleCreateStock(@Payload() data: any) {
+    const ceateStock = await this.msAStockService.createStock(data)
+    return ceateStock;
+  }
 }

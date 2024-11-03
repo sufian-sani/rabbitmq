@@ -2,19 +2,11 @@ import { Module } from '@nestjs/common';
 import { MsCOrdersController } from './ms-c-orders.controller';
 import { MsCOrdersService } from './ms-c-orders.service';
 import {RabbitMQModule} from "@golevelup/nestjs-rabbitmq";
+import {MsCOrdersDatabaseModule} from "./ms-c-orders.database.module";
 
 @Module({
   imports: [
-    RabbitMQModule.forRoot(RabbitMQModule, {
-      exchanges: [
-        {
-          name: 'orders',
-          type: 'topic',
-        },
-      ],
-      uri: 'amqp://localhost:5672',
-    }),
-    MsCOrdersModule,
+      MsCOrdersDatabaseModule,
   ],
   controllers: [MsCOrdersController],
   providers: [MsCOrdersService],

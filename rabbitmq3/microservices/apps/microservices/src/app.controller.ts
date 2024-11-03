@@ -1,29 +1,38 @@
-import {Body, Controller, Get, Param, Post} from '@nestjs/common';
+import {Body, Controller, Get, Inject, Param, Post} from '@nestjs/common';
 import { AppService } from './app.service';
-import { v4 as uuid } from 'uuid'
+import { ClientProxy } from '@nestjs/microservices';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+      @Inject('MY_ECOM_SERVICE') private client1: ClientProxy,
+      @Inject('MY_ECOM_SERVICE_ORDER') private clientOrder: ClientProxy,
+      private readonly appService: AppService
+  ) {}
 
   // stock
   @Get('check-stock')
   async checkStock() {
-    await this.appService.checkStock('jaffa-cake', 1);
+    const pattern = { cmd: 'stock_check' };
+    return this.client1.send(pattern,{}).toPromise();
   }
 
   @Post('create-stock')
   async createStock(@Body() body: any) {
     const { stockId, quantity, name } = body; // Destructure body data
-    // console.log(stockId, quantity, name)
-    await this.appService.createStock(stockId, quantity, name);
+    const pattern = { cmd: 'stock_create' };
+    return this.client1.send(pattern,{stockId, quantity, name}).toPromise();
   }
 
-  @Get('order')
-  async createOrder() {
-    await this.appService.createOrder('jaffa-cake-monster', 'jaffa-cake', 1);
+  // order
+  @Post('order')
+  async createOrder(@Body() body: any) {
+    const { stockId, quantity } = body;
+    const pattern = { cmd: 'order_create' };
+    return this.clientOrder.send(pattern,{stockId, quantity}).toPromise();
   }
 
+  // delivery
   @Get('check-delivery')
   async checkDelivery() {
     await this.appService.checkDelivery('jaffa-cake-monster');
