@@ -1,0 +1,48 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/microservices/src",
+  "monorepo": true,
+  "root": "apps/microservices",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/microservices/tsconfig.app.json"
+  },
+  "projects": {
+    "microservices": {
+      "type": "application",
+      "root": "apps/microservices",
+      "entryFile": "main",
+      "sourceRoot": "apps/microservices/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/microservices/tsconfig.app.json"
+      }
+    },
+    "ms-a-stock": {
+      "type": "application",
+      "root": "apps/ms-a-stock",
+      "entryFile": "main",
+      "sourceRoot": "apps/ms-a-stock/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/ms-a-stock/tsconfig.app.json"
+      }
+    },
+    "ms-b-delivery": {
+      "type": "application",
+      "root": "apps/ms-b-delivery",
+      "entryFile": "main",
+      "sourceRoot": "apps/ms-b-delivery/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/ms-b-delivery/tsconfig.app.json"
+      }
+    },
+    "ms-c-orders": {
+      "type": "application",
+      "root": "apps/ms-c-orders",
+      "entryFile": "main",
+      "sourceRoot": "apps/ms-c-orders/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/ms-c-orders/tsconfig.app.json"
+      }
+    }
+  }
+}
