@@ -29,6 +29,28 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
           },
         },
       },
+      {
+        name: 'DELIVERY_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://localhost:5672'],
+          queue: 'deliver_queue',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+      {
+        name: 'DELIVERY_STATUS_CHANGE_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://localhost:5672'],
+          queue: 'deliver_status_change_queue',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
     ]),
   ],
   controllers: [AppController],

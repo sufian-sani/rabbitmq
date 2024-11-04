@@ -6,7 +6,8 @@ import { ClientProxy } from '@nestjs/microservices';
 export class AppController {
   constructor(
       @Inject('MY_ECOM_SERVICE') private client1: ClientProxy,
-      // @Inject('MY_ECOM_SERVICE_ORDER') private clientOrder: ClientProxy,
+      @Inject('DELIVERY_SERVICE') private clientDelivery: ClientProxy,
+      @Inject('DELIVERY_STATUS_CHANGE_SERVICE') private clientDeliveryStatus: ClientProxy,
       private readonly appService: AppService
   ) {}
 
@@ -27,15 +28,21 @@ export class AppController {
   // order
   @Post('order')
   async createOrder(@Body() body: any) {
-    // const { stockId, quantity } = body;
-    // const pattern = { cmd: 'order_create' };
     return this.appService.createOrder(body)
-    // return this.clientOrder.send(pattern,{stockId, quantity}).toPromise();
   }
 
   // delivery
   @Get('check-delivery')
-  async checkDelivery() {
-    await this.appService.checkDelivery('jaffa-cake-monster');
+  async checkDelivery(@Body() body: any) {
+    const id = body.id;
+    const pattern = { cmd: 'check_delivery_order' };
+    return this.clientDelivery.send(pattern,id).toPromise();
+  }
+
+  @Post('change-delivery-status')
+  async changeDeliveryStatus(@Body() body: any) {
+    const pattern = { cmd: 'delivery_status_change_pattern' };
+    return this.clientDeliveryStatus.send(pattern,body).toPromise();
+    // await this.appService.changeDeliveryStatus(orderDeliverId, deliver_status);
   }
 }

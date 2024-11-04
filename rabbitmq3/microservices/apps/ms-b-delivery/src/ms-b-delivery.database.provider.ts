@@ -1,9 +1,22 @@
-import * as mongoose from 'mongoose';
+import { DataSource } from 'typeorm';
+import {Deliver} from "./schemas/delivery.entity";
 
 export const databaseProviders = [
     {
-        provide: 'DATABASE_CONNECTION',
-        useFactory: (): Promise<typeof mongoose> =>
-            mongoose.connect('mongodb://localhost:27017/delivery'),
+        provide: 'DATA_SOURCE',
+        useFactory: async () => {
+            const dataSource = new DataSource({
+                type: 'postgres',
+                host: 'localhost',
+                port: 5432,
+                username: 'ms-holder',
+                password: '123456',
+                database: 'deliver',
+                entities: [Deliver],
+                synchronize: true,
+            });
+
+            return dataSource.initialize();
+        },
     },
 ];
