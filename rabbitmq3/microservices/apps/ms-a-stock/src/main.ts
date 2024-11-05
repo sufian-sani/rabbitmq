@@ -30,6 +30,18 @@ async function bootstrap() {
     },
   });
 
+  // Connect to the second RabbitMQ microservice
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: ['amqp://localhost:5672'],
+      queue: 'order_cancel_status_back_to_stock_service_queue',
+      queueOptions: {
+        durable: false,
+      },
+    },
+  });
+
   // Start the microservice
   await app.startAllMicroservices();
 

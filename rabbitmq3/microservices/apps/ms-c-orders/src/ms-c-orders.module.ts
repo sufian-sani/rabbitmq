@@ -19,6 +19,17 @@ import {ClientsModule, Transport} from "@nestjs/microservices";
                   },
               },
           },
+          {
+              name: 'ORDER_CANCEL_STATUS_BACK_TO_STOCK_SERVICE',
+              transport: Transport.RMQ,
+              options: {
+                  urls: ['amqp://localhost:5672'],
+                  queue: 'order_cancel_status_back_to_stock_service_queue', // The queue to both send to and listen from
+                  queueOptions: {
+                      durable: false,
+                  },
+              },
+          },
       ]),
       MsCOrdersDatabaseModule,
   ],

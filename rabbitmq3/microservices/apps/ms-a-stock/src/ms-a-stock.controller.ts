@@ -1,6 +1,6 @@
 import {Controller, Get, Inject} from '@nestjs/common';
 import { MsAStockService } from './ms-a-stock.service';
-import {ClientProxy, MessagePattern, Payload} from '@nestjs/microservices';
+import {ClientProxy, EventPattern, MessagePattern, Payload} from '@nestjs/microservices';
 
 @Controller()
 export class MsAStockController {
@@ -25,4 +25,10 @@ export class MsAStockController {
     const quentityAvailable = await this.msAStockService.checkQuentity(data)
     return quentityAvailable;
   }
+
+  @EventPattern('order_cancel_status_back_to_stock_service_queue')
+  async handleCancelStatusBackToStockService(@Payload() data: any) {
+    this.msAStockService.handleStockBackService(data)
+  }
+
 }

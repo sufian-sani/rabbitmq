@@ -102,7 +102,7 @@ export class MsBDeliveryService {
         orderStatusGet,
         orderIdGet
       }
-      this.clientOrder.emit('order_status_change_pattern', data);
+      this.clientOrderStatus.emit('order_status_change_pattern', data);
       return 'message send done to order service'
     } catch (error){
       console.error(error)

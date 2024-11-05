@@ -50,4 +50,18 @@ export class MsAStockService {
       console.error(e);
     }
   }
+  public async handleStockBackService(data){
+    try {
+      const { itemId,quantity } = data
+      const stock = await this.stockRepository
+          .createQueryBuilder()
+          .update(Stock)
+          .set({ quantity: () => `quantity + ${quantity}` })
+          .where("stockId = :itemId AND quantity >= 0", { itemId, quantity })
+          .returning("*")
+          .execute();
+    } catch (error) {
+      console.error(error);
+    }
+  }
 }

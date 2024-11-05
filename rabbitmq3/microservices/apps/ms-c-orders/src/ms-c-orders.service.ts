@@ -10,6 +10,7 @@ export class MsCOrdersService {
   constructor(
       @Inject('DATA_SOURCE') private dataSource: DataSource,
       @Inject('ORDER_SERVICE_CHECK') private client1: ClientProxy,
+      @Inject('ORDER_CANCEL_STATUS_BACK_TO_STOCK_SERVICE') private clientOrderForStock: ClientProxy,
   ){
     this.orderRepository = this.dataSource.getRepository(Order);
   }
@@ -58,13 +59,13 @@ export class MsCOrdersService {
         throw new NotFoundException(`Order with ID ${orderIdGet} not found.`);
       }
       const { status, itemId, quantity } = currentOrderCheck;
-      if (orderStatusGet !== 'cancelled'){
-        if(status === 'cancelled'){
+      if (status !== 'cancelled'){
+        if(orderStatusGet === 'cancelled'){
           const updatedOrder = await this.orderRepository
               .createQueryBuilder()
               .update(Order) // Replace with your actual entity name if different
               .set({ status: orderStatusGet })
-              .where("id = :orderId", { orderIdGet })
+              .where("id = :orderIdGet", { orderIdGet })
               .returning("*") // Ensures the updated document is returned
               .execute();
 
@@ -73,13 +74,14 @@ export class MsCOrdersService {
           if (!updatedDocument) {
             throw new NotFoundException(`Order with ID ${orderIdGet} not found.`);
           }
+          this.clientOrderForStock.emit('order_cancel_status_back_to_stock_service_queue', {itemId, quantity})
           // this.amqpConnection.publish('order-cancel-stock-back', 'order-cancel-stock-back-route', { type: 'order-cancel-stock-back-type', data: { itemId, quantity } });
         } else {
           const updatedOrder = await this.orderRepository
               .createQueryBuilder()
               .update(Order)
-              .set({ status: status })
-              .where("id = :orderId", { orderIdGet })
+              .set({ status: orderStatusGet })
+              .where("id = :orderIdGet", { orderIdGet })
               .returning("*")
               .execute();
           const updatedDocument = updatedOrder.raw[0]; // Get the updated document
