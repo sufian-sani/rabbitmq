@@ -19,7 +19,10 @@ export class MsCOrdersService {
       const { stockId, quantity } = data;
       const checkStock = await this.checkStockQuentity(data)
       if(checkStock.affected === 0 || (Array.isArray(checkStock.raw) && checkStock.raw.length === 0)){
-        return 'Stock not available of the product item';
+        return {
+          success: false,
+          message: 'Stock not available of the product'
+        }
       }
       const productData = {
         itemId: stockId,
@@ -44,7 +47,11 @@ export class MsCOrdersService {
     try {
       const order = await this.orderRepository.findOne({ where: { id: orderId } });
       if (!order) {
-        throw new NotFoundException(`Order with ID ${orderId} not found.`);
+        return {
+          success: false,
+          message: 'order not found'
+        }
+        // throw new NotFoundException(`Order with ID ${orderId} not found.`);
       }
       return order;
     } catch (error) {

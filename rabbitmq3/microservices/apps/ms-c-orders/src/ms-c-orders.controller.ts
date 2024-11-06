@@ -6,7 +6,6 @@ import {ClientProxy, MessagePattern, Payload, EventPattern} from "@nestjs/micros
 export class MsCOrdersController {
   constructor(
       private readonly msCOrdersService: MsCOrdersService,
-      // @Inject('ORDER_CHECK_CONFIRMATION_FOR_DELIVERY') private orderCheckConfirmation: ClientProxy,
   ) {}
 
   @MessagePattern({ cmd: 'order_create' })
@@ -19,12 +18,12 @@ export class MsCOrdersController {
   async handleCheckOderavailability(orderData) {
     try {
       const orderDetails = await this.msCOrdersService.orderGetFromDatabase(orderData)
+      if (orderDetails.success === false){
+        return orderDetails;
+      }
       const {status, id} = orderDetails;
-      // const pattern = { cmd: 'order_check_for_delivery' };
       const orderDetailsInfo = {status, orderId: id}
       return orderDetailsInfo
-      // return this.orderCheckConfirmation.send(pattern, orderDetailsInfo).toPromise();
-      // console.log(orderDetailsInfo)
     } catch (e) {
       console.error(e);
     }

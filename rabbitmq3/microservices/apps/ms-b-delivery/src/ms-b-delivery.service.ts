@@ -1,4 +1,4 @@
-import {Inject, Injectable, NotFoundException} from '@nestjs/common';
+import {HttpStatus, Inject, Injectable, NotFoundException} from '@nestjs/common';
 import {ClientProxy} from "@nestjs/microservices";
 // import {RabbitSubscribe} from "@golevelup/nestjs-rabbitmq";
 import { Deliver } from "./schemas/delivery.entity";
@@ -20,8 +20,8 @@ export class MsBDeliveryService {
       const checkDelivery = await this.deliverRepository.findOne({ where: { orderId: orderIdGet } });
       if(!checkDelivery){
         const idOrderAvailable = await this.checkOrderAvailability(id)
-        if(!idOrderAvailable){
-          return 'this order does not exist';
+        if(idOrderAvailable.success === false){
+          return { success: false, message: 'This order does not exist', status: HttpStatus.NOT_FOUND };
         }
 
         const { status, orderId } = idOrderAvailable
@@ -47,79 +47,108 @@ export class MsBDeliveryService {
   }
   public async changeDeliveryStatus(data){
     try {
-      const {orderDeliverId,deliver_status} = data;
-      const checkOrderDeliveryCondition = await this.handelCheckOrderDeliveryCondition(
-          orderDeliverId,
-          deliver_status
-      )
-      console.log(checkOrderDeliveryCondition)
+      const checkOrderDeliveryCondition = await this.handelCheckOrderDeliveryCondition(data)
+      if(checkOrderDeliveryCondition.success === false){
+        // throw new NotFoundException(`Order with ID ${orderDeliverId} not found.`);
+        // console.log(checkOrderDeliveryCondition)
+        return checkOrderDeliveryCondition
+      }
+      return {
+        success: true,
+        message: 'change signal send to order'
+      }
     } catch (err){
       console.error(err)
     }
   }
-  async handelCheckOrderDeliveryCondition(orderDeliverId: any, deliver_status: any){
+  async handelCheckOrderDeliveryCondition(data:any){
+    const {orderDeliverId, deliver_status} = data;
     try {
       const orderDeliver = await this.deliverRepository.findOne({ where: { id: orderDeliverId } });
       if (!orderDeliver) {
-        throw new NotFoundException(`Order Deliver with ID ${orderDeliverId} not found.`);
+        // throw new NotFoundException(`Order Deliver with ID ${orderDeliverId} not found.`);
+        return {
+          success: false,
+          message: 'order not found'
+        }
       }
       if (orderDeliver.status === deliver_status) {
-        return 'delivery status already exsist'
+        // return 'delivery status already exsist'
+        return {
+          success: false,
+          message: 'delivery status already exsist'
+        }
       } else if (orderDeliver.status === 'cancelled'){
-        return 'order delivery status already cancelled, not able to update'
+        // return 'order delivery status already cancelled, not able to update'
+        return {
+          success: false,
+          message: 'order delivery status already cancelled, not able to update'
+        }
       }
-      // const pattern = { cmd: 'order_status_change_pattern' };
-      // return this.clientOrder.send(pattern, {status, orderId}).toPromise();
       let orderStatusGet=null;
       let orderIdGet=null;
       if(deliver_status==='inprocess'){
         const updatedDeliveryOrder = await this.handelChangeStatus(orderDeliverId, deliver_status)
+        if(updatedDeliveryOrder.success === false){
+          return updatedDeliveryOrder
+        }
         const { status, orderId } = updatedDeliveryOrder;
         orderStatusGet = status
         orderIdGet = orderId
-        // this.amqpConnection.publish('order-delivery-status-change', 'order-delivery-status-change-route', { type: 'order-status-change', data: { status, orderId } });
       } else if(deliver_status==='pending'){
         const updatedDeliveryOrder = await this.handelChangeStatus(orderDeliverId, deliver_status)
+        if(updatedDeliveryOrder.success === false){
+          return updatedDeliveryOrder
+        }
         const { status, orderId } = updatedDeliveryOrder;
         orderStatusGet = status
         orderIdGet = orderId
-        // this.amqpConnection.publish('order-delivery-status-change', 'order-delivery-status-change-route', { type: 'order-status-change', data: { status, orderId } });
       } else if(deliver_status==='shipped'){
         const updatedDeliveryOrder = await this.handelChangeStatus(orderDeliverId, deliver_status)
+        if(updatedDeliveryOrder.success === false){
+          return updatedDeliveryOrder
+        }
         const { status, orderId } = updatedDeliveryOrder;
         orderStatusGet = status
         orderIdGet = orderId
-        // this.amqpConnection.publish('order-delivery-status-change', 'order-delivery-status-change-route', { type: 'order-status-change', data: { status, orderId } });
       } else if(deliver_status==='cancelled'){
         const updatedDeliveryOrder = await this.handelChangeStatus(orderDeliverId, deliver_status)
+        if(updatedDeliveryOrder.success === false){
+          return updatedDeliveryOrder
+        }
         const { status, orderId } = updatedDeliveryOrder;
         orderStatusGet = status
         orderIdGet = orderId
-        // this.amqpConnection.publish('order-delivery-status-change', 'order-delivery-status-change-route', { type: 'order-status-change', data: { status, orderId } });
       }
-      // const pattern = { cmd: 'order_status_change_pattern' };
       const data = {
         orderStatusGet,
         orderIdGet
       }
       this.clientOrderStatus.emit('order_status_change_pattern', data);
-      return 'message send done to order service'
+      return true
     } catch (error){
       console.error(error)
     }
   }
 
   async handelChangeStatus(orderDeliverId: any, deliver_status: any){
-    const updatedDeliveryOrder = await this.deliverRepository.createQueryBuilder()
-        .update(Deliver) // Replace with your entity name
-        .set({ status: deliver_status })
-        .where("id = :orderDeliverId", { orderDeliverId })
-        .returning("*") // Returns the updated document
-        .execute();
-    const updatedOrder = updatedDeliveryOrder.raw[0];
-    if (!updatedOrder) {
-      throw new NotFoundException(`Order with ID ${orderDeliverId} not found.`);
+    try {
+      const updatedDeliveryOrder = await this.deliverRepository.createQueryBuilder()
+          .update(Deliver) // Replace with your entity name
+          .set({ status: deliver_status })
+          .where("id = :orderDeliverId", { orderDeliverId })
+          .returning("*") // Returns the updated document
+          .execute();
+      const updatedOrder = updatedDeliveryOrder.raw[0];
+      if (!updatedOrder) {
+        return {
+          success: false,
+          message: 'Not found in delivery list'
+        }
+      }
+      return updatedOrder;
+    } catch (error){
+      console.error(error)
     }
-    return updatedOrder;
   }
 }
