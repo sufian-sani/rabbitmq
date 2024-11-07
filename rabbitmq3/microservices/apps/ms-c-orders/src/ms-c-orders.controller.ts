@@ -16,17 +16,13 @@ export class MsCOrdersController {
 
   @MessagePattern({ cmd: 'order_availability_check' })
   async handleCheckOderavailability(orderData) {
-    try {
       const orderDetails = await this.msCOrdersService.orderGetFromDatabase(orderData)
       if (orderDetails.success === false){
         return orderDetails;
       }
-      const {status, id} = orderDetails;
+      const { status, id } = orderDetails
       const orderDetailsInfo = {status, orderId: id}
       return orderDetailsInfo
-    } catch (e) {
-      console.error(e);
-    }
   }
 
   @EventPattern('order_status_change_pattern')

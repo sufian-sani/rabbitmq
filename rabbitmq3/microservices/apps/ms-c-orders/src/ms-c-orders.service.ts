@@ -9,7 +9,6 @@ export class MsCOrdersService {
   private orderRepository: Repository<Order>;
   constructor(
       @Inject('DATA_SOURCE') private dataSource: DataSource,
-      @Inject('ORDER_SERVICE_CHECK') private client1: ClientProxy,
       @Inject('ORDER_CANCEL_STATUS_BACK_TO_STOCK_SERVICE') private clientOrderForStock: ClientProxy,
   ){
     this.orderRepository = this.dataSource.getRepository(Order);
@@ -17,13 +16,6 @@ export class MsCOrdersService {
   public async createOrder(data) {
     try {
       const { stockId, quantity } = data;
-      const checkStock = await this.checkStockQuentity(data)
-      if(checkStock.affected === 0 || (Array.isArray(checkStock.raw) && checkStock.raw.length === 0)){
-        return {
-          success: false,
-          message: 'Stock not available of the product'
-        }
-      }
       const productData = {
         itemId: stockId,
         quantity
@@ -32,14 +24,6 @@ export class MsCOrdersService {
       return await this.orderRepository.save(newOrder);
     } catch (e) {
       console.error(e);
-    }
-  }
-  public checkStockQuentity(data) {
-    try {
-      const pattern = { cmd: 'check_quentity' };
-      return this.client1.send(pattern, data).toPromise();
-    } catch (error) {
-      console.error(error);
     }
   }
 

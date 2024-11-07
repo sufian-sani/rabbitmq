@@ -9,17 +9,6 @@ import {ClientsModule, Transport} from "@nestjs/microservices";
   imports: [
       ClientsModule.register([
           {
-              name: 'ORDER_SERVICE_CHECK',
-              transport: Transport.RMQ,
-              options: {
-                  urls: ['amqp://localhost:5672'],
-                  queue: 'my_order_stock_check_queue', // The queue to both send to and listen from
-                  queueOptions: {
-                      durable: false,
-                  },
-              },
-          },
-          {
               name: 'ORDER_CANCEL_STATUS_BACK_TO_STOCK_SERVICE',
               transport: Transport.RMQ,
               options: {
