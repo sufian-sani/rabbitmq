@@ -64,6 +64,12 @@ export class MsBDeliveryService {
   async handelCheckOrderDeliveryCondition(data:any){
     const {orderDeliverId, deliver_status} = data;
     try {
+      if(!Number.isInteger(orderDeliverId)){
+        return {
+          success: false,
+          message: 'order id must be an integer',
+        }
+      }
       const orderDeliver = await this.deliverRepository.findOne({ where: { id: orderDeliverId } });
       if (!orderDeliver) {
         // throw new NotFoundException(`Order Deliver with ID ${orderDeliverId} not found.`);
