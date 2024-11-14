@@ -10,8 +10,8 @@ export class AppService {
       @Inject('ORDER_STOCK_CHECK_SERVICE') private client1: ClientProxy,
   ) {}
 
-  async createOrder(data) {
-      const checkStock = await this.checkStockQuentity(data)
+  async createOrder(body) {
+      const checkStock = await this.checkStockQuentity(body)
       if(checkStock.data.affected === 0 || (Array.isArray(checkStock.data.raw) && checkStock.data.raw.length === 0)){
           return {
               success: false,
@@ -19,7 +19,7 @@ export class AppService {
           }
       }
     const pattern = { cmd: 'order_create' };
-    return this.clientOrder.send(pattern, data)
+    return this.clientOrder.send(pattern, body)
         .pipe(
             timeout(3000)
         )
