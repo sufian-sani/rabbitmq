@@ -73,6 +73,30 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
           },
         },
       },
+      {
+        name: 'LOGIN_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://localhost:5672'],
+          queue: 'login_queue',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+      {
+        name: 'CHECK_AUTH_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://localhost:5672'],
+          queue: 'check_auth_queue',
+          queueOptions: {
+            durable: false,
+          },
+          exchange: 'check_auth_exchange',
+          exchangeType: 'header',
+        },
+      },
     ]),
   ],
   controllers: [AppController],

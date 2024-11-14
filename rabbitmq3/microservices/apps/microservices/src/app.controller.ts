@@ -1,4 +1,4 @@
-import {Body, Controller, Get, HttpStatus, Inject, Param, Post} from '@nestjs/common';
+import {Body, Controller, Get, HttpStatus, Inject, Param, Post, Headers} from '@nestjs/common';
 import { AppService } from './app.service';
 import { ClientProxy } from '@nestjs/microservices';
 import {timeout} from "rxjs";
@@ -9,8 +9,62 @@ export class AppController {
       @Inject('MY_ECOM_SERVICE') private client1: ClientProxy,
       @Inject('DELIVERY_SERVICE') private clientDelivery: ClientProxy,
       @Inject('DELIVERY_STATUS_CHANGE_SERVICE') private clientDeliveryStatus: ClientProxy,
+      @Inject('REGISTER_SERVICE') private userRegisterService: ClientProxy,
+      @Inject('LOGIN_SERVICE') private userLoginService: ClientProxy,
       private readonly appService: AppService
   ) {}
+
+    //User
+    // Register route
+    @Post('users/register')
+    async register(@Body() body: { username: string; password: string }) {
+        const { username, password } = body;
+        const pattern = { cmd: 'create_user' };
+        return this.userRegisterService.send(pattern,{username, password})
+            .pipe(
+                timeout(2000)
+            )
+            .toPromise()
+            .then(response => {
+                return response;
+            })
+            .catch(err =>{
+                if (err.name === 'TimeoutError'){
+                    console.error('Request timed out, but sending success response');
+                    return { success: true, message: 'Request timed out, but considered successful'}
+                }
+            })
+    }
+
+    // Login route
+    @Post('users/login')
+    async login(@Body() body: { username: string; password: string }){
+      const { username, password } = body;
+      const pattern = { cmd: 'login_user' };
+        return this.userLoginService.send(pattern,{username, password})
+            .pipe(
+                timeout(2000)
+            )
+            .toPromise()
+            .then(response => {
+                return response;
+            })
+            .catch(err =>{
+                if (err.name === 'TimeoutError'){
+                    console.error('Request timed out, but sending success response');
+                    return { success: true, message: 'Request timed out, but considered successful'}
+                }
+            })
+    }
+
+    @Get('users/auth')
+    async checkAuth(@Headers('Authorization') authHeader: string){
+        const token = authHeader && authHeader.split(' ')[1];
+        if (!token) {
+            throw new Error('Authorization token missing');
+        }
+        console.log('checkAuth', token)
+    }
 
   // stock
   @Get('check-stock')

@@ -1,20 +1,23 @@
 import {Body, Controller, Get, Post, UseGuards, Request} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import {MessagePattern} from "@nestjs/microservices";
 
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
     // Register route
-    @Post('register')
+    // @Post('register')
+    @MessagePattern({ cmd: 'create_user' })
     async register(@Body() body: { username: string; password: string }) {
         const { username, password } = body;
         return await this.usersService.register(username, password);
     }
 
     // Login route
-    @Post('login')
+    // @Post('login')
+    @MessagePattern({ cmd: 'login_user' })
     async login(@Body() body: { username: string; password: string }) {
         const { username, password } = body;
         return await this.usersService.login(username, password);
