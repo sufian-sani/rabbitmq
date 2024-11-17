@@ -1,7 +1,8 @@
 import {Body, Controller, Get, HttpStatus, Inject, Param, Post, Headers} from '@nestjs/common';
 import { AppService } from './app.service';
-import { ClientProxy } from '@nestjs/microservices';
+import {ClientProxy, RmqRecordBuilder} from '@nestjs/microservices';
 import {timeout} from "rxjs";
+import { CheckUser } from './check-auth.decorator';
 
 @Controller()
 export class AppController {
@@ -57,14 +58,26 @@ export class AppController {
             })
     }
 
+    // check service
+    // @Get('users/auth')
+    // async checkAuth(@Headers('Authorization') authHeader: string){
+    //     const token = authHeader && authHeader.split(' ')[1];
+    //     return this.appService.checkUser(token)
+    // }
+
+    // ----------------------------------------------
+
     @Get('users/auth')
-    async checkAuth(@Headers('Authorization') authHeader: string){
-        const token = authHeader && authHeader.split(' ')[1];
-        if (!token) {
-            throw new Error('Authorization token missing');
+    async checkAuth(@CheckUser() req: any, @Body() body: any){
+        if (!req){
+            return 'user not found';
         }
-        console.log('checkAuth', token)
+      return req
+        // const token = authHeader && authHeader.split(' ')[1];
+        // return this.appService.checkUser(token)
     }
+
+    // ----------------------------------------------
 
   // stock
   @Get('check-stock')

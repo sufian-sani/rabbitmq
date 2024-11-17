@@ -7,6 +7,7 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import {AuthService} from "./auth.service";
 
 
 @Module({
@@ -18,7 +19,7 @@ import { JwtAuthGuard } from './jwt-auth.guard';
       signOptions: { expiresIn: '23h' },
     }),
   ],
-  providers: [UsersService, JwtStrategy, JwtAuthGuard],
+  providers: [UsersService, JwtStrategy, JwtAuthGuard, AuthService],
   controllers: [UsersController]
 })
 export class UsersModule {}

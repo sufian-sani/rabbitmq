@@ -1,8 +1,12 @@
-import { Module } from '@nestjs/common';
+import {MiddlewareConsumer, Module, NestModule} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import {RabbitMQModule} from "@golevelup/nestjs-rabbitmq";
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import {UserCheckService} from "./user-check.service";
+import {AuthMiddleware} from "./check-user.middleware";
+import {CheckUser} from "./check-auth.decorator";
+import {CheckService} from "./check.service";
 
 @Module({
   imports: [
@@ -100,6 +104,13 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     ]),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, CheckService],
 })
-export class AppModule {}
+
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes('*');
+  }
+}
+
+// export class AppModule {}

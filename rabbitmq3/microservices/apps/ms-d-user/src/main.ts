@@ -29,6 +29,20 @@ async function bootstrap() {
     },
   });
 
+  // check user
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: ['amqp://localhost:5672'], // RabbitMQ server URL
+      queue: 'check_auth_queue',              // Queue to listen to
+      queueOptions: {
+        durable: false,
+      },
+      // exchange: 'check_auth_exchange',
+      // exchangeType: 'header',
+    },
+  });
+
   // Start the microservice
   await app.startAllMicroservices();
 

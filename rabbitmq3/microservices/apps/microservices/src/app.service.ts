@@ -1,5 +1,5 @@
 import {HttpStatus, Inject, Injectable} from '@nestjs/common';
-import {ClientProxy} from "@nestjs/microservices";
+import {ClientProxy, RmqRecordBuilder} from "@nestjs/microservices";
 import {AmqpConnection} from "@golevelup/nestjs-rabbitmq";
 import {timeout} from "rxjs";
 
@@ -8,6 +8,7 @@ export class AppService {
   constructor(
       @Inject('MY_ECOM_SERVICE_ORDER') private clientOrder: ClientProxy,
       @Inject('ORDER_STOCK_CHECK_SERVICE') private client1: ClientProxy,
+      @Inject('CHECK_AUTH_SERVICE') private userCheckService: ClientProxy,
   ) {}
 
   async createOrder(body) {
@@ -55,6 +56,34 @@ export class AppService {
         } catch (error) {
             console.error(error);
         }
+    }
+
+    public checkUser(token:any) {
+        if (!token) {
+            throw new Error('Authorization token missing');
+        }
+        const pattern = { cmd: 'check_user' };
+        const record = new RmqRecordBuilder('')
+            .setOptions({
+                headers: {
+                    ['Authorization']: `Bearer ${token}`,
+                },
+            })
+            .build();
+        return this.userCheckService.send(pattern, record)
+            .pipe(
+                timeout(3000)
+            )
+            .toPromise()
+            .then(response => {
+                return response;
+            })
+            .catch(err =>{
+                if (err.name === 'TimeoutError'){
+                    console.error('Request timed out, but sending success response');
+                    return { success: true, message: 'Request timed out, but considered successful'}
+                }
+            })
     }
 
 }
