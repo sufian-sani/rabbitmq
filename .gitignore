@@ -69,4 +69,6 @@ build/
 # Ignore public files (optional, modify as needed)
 public/*.js
 public/*.map
-.idea
+
+**/node_modules/
+**/.idea/
