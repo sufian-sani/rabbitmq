@@ -100,7 +100,10 @@ export class AppController {
   }
 
   @Post('create-stock')
-  async createStock(@Body() body: any) {
+  async createStock(@CheckUser() user: any, @Body() body: any) {
+      if (!user.id){
+          return 'user not found';
+      }
     const { stockId, quantity, name } = body; // Destructure body data
     const pattern = { cmd: 'stock_create' };
     return this.client1.send(pattern,{stockId, quantity, name})
